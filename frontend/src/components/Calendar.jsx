@@ -14,8 +14,10 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
   const [showModal, setShowModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
-  // key to force Sidebar to refresh its data
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0)
+
+  // new: mobile sidebar toggle
+  const [showSidebar, setShowSidebar] = useState(false)
 
   useEffect(() => {
     const start = getStartDate()
@@ -55,25 +57,17 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
 
   const handlePrevious = () => {
     const date = new Date(currentDate)
-    if (view === "month") {
-      date.setMonth(date.getMonth() - 1)
-    } else if (view === "week") {
-      date.setDate(date.getDate() - 7)
-    } else {
-      date.setDate(date.getDate() - 1)
-    }
+    if (view === "month") date.setMonth(date.getMonth() - 1)
+    else if (view === "week") date.setDate(date.getDate() - 7)
+    else date.setDate(date.getDate() - 1)
     setCurrentDate(date)
   }
 
   const handleNext = () => {
     const date = new Date(currentDate)
-    if (view === "month") {
-      date.setMonth(date.getMonth() + 1)
-    } else if (view === "week") {
-      date.setDate(date.getDate() + 7)
-    } else {
-      date.setDate(date.getDate() + 1)
-    }
+    if (view === "month") date.setMonth(date.getMonth() + 1)
+    else if (view === "week") date.setDate(date.getDate() + 7)
+    else date.setDate(date.getDate() + 1)
     setCurrentDate(date)
   }
 
@@ -82,7 +76,6 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
   }
 
   const handleCreateEvent = (eventData) => {
-    // support async or sync onCreateEvent; bump sidebar key after completion
     Promise.resolve(onCreateEvent(eventData)).finally(() => {
       setShowModal(false)
       setSidebarRefreshKey((k) => k + 1)
@@ -95,15 +88,15 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
         setShowModal(false)
         setSidebarRefreshKey((k) => k + 1)
       })
-    } else {
-      setShowModal(false)
-    }
+    } else setShowModal(false)
   }
 
   const handleDateSelect = (date) => {
     setSelectedDate(date)
     setSelectedEvent(null)
     setShowModal(true)
+    // close mobile sidebar when selecting a date
+    setShowSidebar(false)
   }
 
   const handleEventClick = (event) => {
@@ -123,41 +116,75 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
   const handleDateFromSidebar = (date) => {
     setCurrentDate(date)
     setView("month")
+    setShowSidebar(false)
   }
 
   return (
     <div className="calendar-container">
-      <Sidebar selectedDate={selectedDate} onDateSelect={handleDateFromSidebar} refreshKey={sidebarRefreshKey} />
+      {/* Sidebar + overlay */}
+      <div className={`sidebar-wrapper ${showSidebar ? "open" : "collapsed"}`}>
+        <Sidebar selectedDate={selectedDate} onDateSelect={handleDateFromSidebar} refreshKey={sidebarRefreshKey} />
+      </div>
+
+      <div className={`sidebar-overlay ${showSidebar ? "visible" : ""}`} onClick={() => setShowSidebar(false)} />
+
       <div className="calendar-main">
         <div className="calendar-header">
           <div className="header-controls">
+            {/* mobile hamburger to open sidebar */}
+            <button
+              className="mobile-menu-btn"
+              aria-label="Open sidebar"
+              onClick={() => setShowSidebar((s) => !s)}
+              title="Open sidebar"
+            >
+              {/* simple hamburger */}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+
             <button className="btn btn-today" onClick={handleToday}>
               Today
             </button>
-            <div className="nav-arrows">
-              <button className="btn btn-nav" onClick={handlePrevious}>
+
+            <div className="nav-arrows" role="group" aria-label="Navigate date">
+              <button className="btn btn-nav" onClick={handlePrevious} aria-label="Previous">
                 &#8249;
               </button>
-              <button className="btn btn-nav" onClick={handleNext}>
+              <button className="btn btn-nav" onClick={handleNext} aria-label="Next">
                 &#8250;
               </button>
             </div>
+
             <h2 className="header-title">
-              {currentDate.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-              })}
+              {currentDate.toLocaleDateString(undefined, { year: "numeric", month: "long" })}
             </h2>
           </div>
 
-          <div className="view-controls">
-            <button className={`btn view-btn ${view === "day" ? "active" : ""}`} onClick={() => setView("day")}>
+          <div className="view-controls" role="tablist" aria-label="Views">
+            <button
+              className={`btn view-btn ${view === "day" ? "active" : ""}`}
+              onClick={() => setView("day")}
+              role="tab"
+              aria-selected={view === "day"}
+            >
               Day
             </button>
-            <button className={`btn view-btn ${view === "week" ? "active" : ""}`} onClick={() => setView("week")}>
+            <button
+              className={`btn view-btn ${view === "week" ? "active" : ""}`}
+              onClick={() => setView("week")}
+              role="tab"
+              aria-selected={view === "week"}
+            >
               Week
             </button>
-            <button className={`btn view-btn ${view === "month" ? "active" : ""}`} onClick={() => setView("month")}>
+            <button
+              className={`btn view-btn ${view === "month" ? "active" : ""}`}
+              onClick={() => setView("month")}
+              role="tab"
+              aria-selected={view === "month"}
+            >
               Month
             </button>
           </div>

@@ -1,87 +1,201 @@
+/* Calendar.css - polished and responsive */
+
+:root{
+  --bg: #fff;
+  --muted: #6b7280;
+  --border: #e6e9ee;
+  --accent: #1f2937;
+  --accent-blue: #2563eb;
+  --panel: #f9fafb;
+  --shadow: 0 8px 30px rgba(17,24,39,0.06);
+  --sidebar-w: 280px;
+}
+
+/* Layout */
 .calendar-container {
   display: flex;
   width: 100%;
-  height: 100vh;
-  background-color: #fff;
+  min-height: 100vh;
+  background-color: var(--bg);
+  overflow: hidden;
+  gap: 0;
 }
 
+/* Sidebar wrapper (controls responsive show/hide) */
+.sidebar-wrapper {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  max-width: var(--sidebar-w);
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 260ms;
+  box-shadow: none;
+  z-index: 40;
+  background: #fff;
+  border-right: 1px solid var(--border);
+}
+
+/* collapsed state on small screens */
+.sidebar-wrapper.collapsed {
+  transform: translateX(-100%);
+  box-shadow: none;
+}
+
+/* open overlay slide-in mobile state */
+.sidebar-wrapper.open {
+  transform: translateX(0);
+  box-shadow: var(--shadow);
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+}
+
+/* overlay behind sidebar (only displayed on mobile open) */
+.sidebar-overlay {
+  display: none;
+}
+.sidebar-overlay.visible {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(17,24,39,0.35);
+  z-index: 30;
+}
+
+/* Main area */
 .calendar-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #e5e7eb;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
+/* Header */
 .calendar-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #fff;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.9));
 }
 
+/* Left controls group */
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
+/* Mobile menu (hamburger) */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.mobile-menu-btn:hover { background: rgba(17,24,39,0.03); color: #111827; }
+
+/* Nav arrows container */
 .nav-arrows {
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  align-items: center;
 }
 
+/* Title */
 .header-title {
   font-size: 20px;
-  font-weight: 500;
-  color: #1f2937;
-  min-width: 180px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 8px;
+  min-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* View controls group (right) */
 .view-controls {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
+/* Buttons */
 .btn {
-  padding: 8px 16px;
+  padding: 8px 14px;
   border: none;
   background-color: transparent;
-  color: #1f2937;
+  color: #111827;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  border-radius: 10px;
+  transition: all 0.14s ease;
 }
 
-.btn:hover {
-  background-color: #f3f4f6;
-}
+.btn:hover { background: rgba(17,24,39,0.04); transform: translateY(-1px); }
 
+/* Today button */
 .btn-today {
-  padding: 8px 16px;
-  background-color: transparent;
-  border: 1px solid #d1d5db;
-  color: #1f2937;
-}
-
-.btn-today:hover {
-  background-color: #f9fafb;
-}
-
-.btn-nav {
   padding: 8px 12px;
+  background: transparent;
+  border: 1px solid rgba(17,24,39,0.06);
+}
+
+/* nav arrow style */
+.btn-nav {
+  padding: 8px 10px;
   font-size: 18px;
+  line-height: 1;
 }
 
+/* view button active */
 .view-btn.active {
-  background-color: #1f2937;
+  background: var(--accent);
   color: #fff;
+  box-shadow: 0 6px 18px rgba(17,24,39,0.06);
 }
 
+/* content */
 .calendar-content {
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
+  background: linear-gradient(180deg, #fff, #fbfdff);
+  padding: 18px;
+}
+
+/* small devices: collapse sidebar and stack header */
+@media (max-width: 900px) {
+  .sidebar-wrapper {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+  }
+  .sidebar-wrapper.collapsed { transform: translateX(-100%); }
+  .mobile-menu-btn { display: inline-flex; }
+  .sidebar-overlay { display: none; }
+  .sidebar-overlay.visible { display: block; }
+  .calendar-content { padding: 12px; }
+  .header-title { font-size: 16px; min-width: 120px; }
+}
+
+/* very small devices: stack header rows for better tap targets */
+@media (max-width: 480px) {
+  .calendar-header {
+    padding: 12px;
+    gap: 10px;
+  }
+  .header-controls { gap: 8px; }
+  .view-controls { gap: 6px; }
+  .btn { padding: 8px 10px; font-size: 13px; }
+  .btn-nav { padding: 6px 8px; font-size: 16px; }
+  .calendar-content { padding: 10px; }
 }

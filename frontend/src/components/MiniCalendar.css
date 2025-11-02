@@ -1,87 +1,129 @@
 .mini-calendar {
   background-color: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+  border: 1px solid #e6e9ee;
+  border-radius: 10px;
+  padding: 10px;
+  width: 100%;
+  max-width: 260px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
 .mini-calendar-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.mini-calendar-header button {
+.nav-btn {
   background: none;
   border: none;
-  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 6px;
   cursor: pointer;
-  color: #6b7280;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  color: #4b5563;
+  font-size: 18px;
+  transition: background 140ms, color 140ms, transform 120ms;
 }
-
-.mini-calendar-header button:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
+.nav-btn:hover {
+  background: rgba(17, 24, 39, 0.04);
+  color: #111827;
+  transform: translateY(-1px);
 }
 
 .month-year {
   font-size: 13px;
   font-weight: 600;
-  color: #1f2937;
+  color: #111827;
 }
 
+/* weekdays */
 .mini-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
-
 .mini-weekday {
   text-align: center;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #6b7280;
 }
 
+/* days grid */
 .mini-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
 
+/* day button common */
 .mini-day {
-  aspect-ratio: 1;
+  height: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   border: none;
-  background-color: transparent;
-  font-size: 12px;
-  border-radius: 4px;
+  background: transparent;
+  color: #111827;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: #1f2937;
+  transition: background 140ms, transform 120ms, box-shadow 120ms;
 }
 
-.mini-day:hover:not(.empty) {
-  background-color: #f3f4f6;
-}
-
+/* empty cells: invisible and not clickable */
 .mini-day.empty {
+  pointer-events: none;
+  background: transparent;
   cursor: default;
+  height: 36px;
 }
 
+/* hover for active days */
+.mini-day:not(.empty):hover {
+  background: rgba(17,24,39,0.04);
+  transform: translateY(-1px);
+}
+
+/* today: ring style (like google calendar) */
 .mini-day.today {
-  background-color: #fbbf24;
-  color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(251,191,36,0.14);
+  border: 2px solid rgba(251,191,36,0.18);
+  color: #111827;
   font-weight: 600;
+  background: rgba(251,191,36,0.08);
 }
 
+/* selected: filled pill / circle */
 .mini-day.selected {
-  background-color: #2563eb;
+  background: #2563eb;
   color: #fff;
   font-weight: 600;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+  transform: translateY(0);
+}
+
+/* when day is both selected and today, ensure selected is visible */
+.mini-day.selected.today {
+  box-shadow: 0 6px 18px rgba(37,99,235,0.14);
+  border: none;
+}
+
+/* focus state */
+.mini-day:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+  border-radius: 50%;
+}
+
+/* small screens */
+@media (max-width: 420px) {
+  .mini-calendar { max-width: 220px; padding: 8px; }
+  .mini-day { height: 32px; min-height: 32px; font-size: 12px; }
 }
