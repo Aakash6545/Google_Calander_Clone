@@ -1,6 +1,6 @@
-# Calendar Assignment — README
+# Calendar Clone — README
 
-Minimal, focused documentation describing what the project does, how to run it, architecture and implementation notes, edge cases handled, UI/UX/animation details, and suggested next steps.
+This is the documentation of project describing what the project does, how to run it, architecture and implementation notes
 
 ## What this is
 A single-page calendar application (assignment) with:
