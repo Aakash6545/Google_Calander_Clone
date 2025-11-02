@@ -1,4 +1,3 @@
-/* Calendar.css - polished and responsive */
 
 :root{
   --bg: #fff;
@@ -21,7 +20,6 @@
   gap: 0;
 }
 
-/* Sidebar wrapper (controls responsive show/hide) */
 .sidebar-wrapper {
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
@@ -29,13 +27,12 @@
   background: #fff;
   border-right: 1px solid var(--border);
   transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 260ms;
-  position: relative; /* desktop: occupies layout space */
+  position: relative; 
   height: 100vh;
   z-index: 40;
   box-shadow: none;
 }
 
-/* collapsed state - on desktop collapsed means hidden (shouldn't happen) */
 .sidebar-wrapper.collapsed {
   transform: translateX(-100%);
 }
@@ -45,7 +42,6 @@
   transform: translateX(0);
 }
 
-/* overlay behind sidebar (only displayed on mobile open) */
 .sidebar-overlay {
   position: fixed;
   inset: 0;
@@ -60,7 +56,7 @@
   pointer-events: auto;
 }
 
-/* Main area */
+
 .calendar-main {
   flex: 1 1 auto;
   min-width: 0;
@@ -82,14 +78,12 @@
   background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.9));
 }
 
-/* Left controls group */
 .header-controls {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* Mobile menu (hamburger) */
 .mobile-menu-btn {
   display: none;
   background: none;
@@ -101,9 +95,9 @@
 }
 .mobile-menu-btn:hover { background: rgba(17,24,39,0.03); color: #111827; }
 
-/* Mobile menu (hamburger) - show always so user can open sidebar explicitly */
+
 .mobile-menu-btn {
-  display: inline-flex; /* always visible per request */
+  display: inline-flex; 
   align-items: center;
   justify-content: center;
   height: 36px;
@@ -126,7 +120,6 @@
     display: inline-flex;
   }
 }
-/* Nav arrows container */
 .nav-arrows {
   display: flex;
   gap: 6px;
@@ -145,7 +138,6 @@
   text-overflow: ellipsis;
 }
 
-/* View controls group (right) */
 .view-controls {
   display: flex;
   gap: 8px;
@@ -187,7 +179,6 @@
   box-shadow: 0 6px 18px rgba(17,24,39,0.06);
 }
 
-/* content */
 .calendar-content {
   flex: 1;
   overflow: auto;
@@ -195,24 +186,21 @@
   padding: 18px;
 }
 
-/* Update the sidebar-wrapper styles */
 .sidebar-wrapper {
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
   max-width: var(--sidebar-w);
   background: #fff;
   border-right: 1px solid var(--border);
-  position: relative; /* Change from fixed to relative for large screens */
+  position: relative; 
   height: 100vh;
   transition: transform 260ms cubic-bezier(.2,.9,.2,1);
 }
 
-/* Remove transform by default (visible on desktop) */
 .sidebar-wrapper.collapsed {
   transform: none;
 }
 
-/* Mobile styles */
 @media (max-width: 900px) {
   .sidebar-wrapper {
     position: fixed;
@@ -231,18 +219,15 @@
     transform: translateX(0);
   }
 
-  /* ensure calendar content stretches full width when sidebar hidden */
   .calendar-main {
     width: 100%;
   }
 
-  /* show hamburger only on mobile */
   .mobile-menu-btn {
     display: inline-flex;
   }
 }
 
-/* Desktop: ensure hamburger hidden */
 @media (min-width: 901px) {
   .mobile-menu-btn {
     display: none;

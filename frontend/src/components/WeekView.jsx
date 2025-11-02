@@ -3,22 +3,13 @@
 import React, { useMemo } from "react"
 import "./WeekView.css"
 
-/**
- * WeekView
- *
- * Props:
- * - currentDate: Date (any date within the week to show)
- * - events: array of { _id, title, startTime, endTime, color }
- * - onDateSelect(date) - called when user clicks a day (or the "+ more" fallback)
- * - onEventClick(event) - called when an event is clicked
- */
+
 export default function WeekView({
   currentDate = new Date(),
   events = [],
   onDateSelect = () => {},
   onEventClick = () => {},
 }) {
-  // compute start of week (Sunday) at local midnight
   const getStartOfWeek = (d) => {
     const copy = new Date(d)
     const day = copy.getDay() // 0..6 (Sun..Sat)
@@ -29,7 +20,6 @@ export default function WeekView({
 
   const weekStart = useMemo(() => getStartOfWeek(currentDate), [currentDate])
 
-  // array of 7 Date objects for each day in the week
   const days = useMemo(() => {
     const arr = []
     for (let i = 0; i < 7; i++) {
@@ -40,20 +30,17 @@ export default function WeekView({
     return arr
   }, [weekStart])
 
-  // normalize events: ensure valid Date objects and sensible endTimes
   const normalizedEvents = useMemo(() => {
     return (Array.isArray(events) ? events : []).map((ev) => {
       const s = new Date(ev.startTime)
       let e = ev.endTime ? new Date(ev.endTime) : null
       if (!e || Number.isNaN(e.getTime()) || e <= s) {
-        // default to 60 minutes if invalid or missing
         e = new Date(s.getTime() + 60 * 60 * 1000)
       }
       return { ...ev, start: s, end: e }
     })
   }, [events])
 
-  // helper: returns events that intersect with the given day (local)
   const getEventsForDay = (dayDate) => {
     const startOfDay = new Date(dayDate)
     startOfDay.setHours(0, 0, 0, 0)
@@ -63,7 +50,6 @@ export default function WeekView({
     return normalizedEvents.filter((ev) => ev.start <= endOfDay && ev.end >= startOfDay)
   }
 
-  // convert a time to minutes offset within the day (0..1440)
   const minutesFromStartOfDay = (date, dayStart) => {
     const ms = date.getTime() - dayStart.getTime()
     const mins = Math.round(ms / 60000)
@@ -72,9 +58,7 @@ export default function WeekView({
     return mins
   }
 
-  // layout algorithm to create columns for overlapping events in a single day:
-  // returns array of event layout objects { event, top%, height%, left%, width% }
-  const layoutEventsForDay = (dayDate) => {
+   const layoutEventsForDay = (dayDate) => {
     const evs = getEventsForDay(dayDate)
       .map((ev) => {
         const dayStart = new Date(dayDate)
@@ -82,8 +66,7 @@ export default function WeekView({
 
         const s = Math.max(0, minutesFromStartOfDay(ev.start, dayStart))
         const e = Math.min(24 * 60, minutesFromStartOfDay(ev.end, dayStart))
-        const dur = Math.max(15, e - s) // min 15 mins visible
-
+        const dur = Math.max(15, e - s) 
         return {
           raw: ev,
           startMin: s,
@@ -93,13 +76,11 @@ export default function WeekView({
       })
       .sort((a, b) => a.startMin - b.startMin || b.durMin - a.durMin)
 
-    // columns: array of lastEndMin for each column and list of events assigned
-    const columns = [] // each column: { lastEndMin, items: [idxs] }
-    const placements = [] // same length as evs: { colIndex, totalCols }
+    const columns = [] 
+    const placements = [] 
 
     for (let i = 0; i < evs.length; i++) {
       const ev = evs[i]
-      // find first column where it doesn't overlap
       let placed = false
       for (let c = 0; c < columns.length; c++) {
         if (ev.startMin >= columns[c].lastEndMin) {
@@ -117,7 +98,6 @@ export default function WeekView({
     }
 
     const totalCols = Math.max(1, columns.length)
-    // Now compute final layout percentages
     const result = evs.map((ev, idx) => {
       const colIndex = placements[idx].colIndex
       const left = (colIndex / totalCols) * 100
@@ -160,7 +140,6 @@ export default function WeekView({
       </div>
 
       <div className="week-grid">
-        {/* left time column */}
         <div className="time-column" aria-hidden>
           {Array.from({ length: 24 }).map((_, hour) => (
             <div key={hour} className="time-slot">
@@ -169,7 +148,6 @@ export default function WeekView({
           ))}
         </div>
 
-        {/* day columns */}
         {days.map((d, dayIndex) => {
           const layouts = layoutEventsForDay(d)
           return (
@@ -192,7 +170,6 @@ export default function WeekView({
                 {layouts.map((pl) => {
                   const ev = pl.event
                   const bg = ev.color || "#2563eb"
-                  // compute text color for readability (simple luminance)
                   const getTextColor = (hex) => {
                     try {
                       const s = String(hex).replace("#", "")

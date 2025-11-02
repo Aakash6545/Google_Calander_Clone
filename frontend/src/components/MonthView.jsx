@@ -5,10 +5,8 @@ import "./MonthView.css"
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-// simple helper to compute readable text color (black or white) based on background color
 function getContrastColor(hexOrRgb) {
   try {
-    // normalize rgb(...) or hex (#RRGGBB or #RGB)
     let r, g, b
     const str = String(hexOrRgb).trim()
 
@@ -43,7 +41,6 @@ export default function MonthView({ currentDate = new Date(), events = [], onDat
   const daysInMonth = lastDay.getDate()
   const startingDayOfWeek = firstDay.getDay()
 
-  // build days grid with leading & trailing nulls so it's always a multiple of 7
   const days = useMemo(() => {
     const arr = []
     for (let i = 0; i < startingDayOfWeek; i++) arr.push(null)
@@ -52,7 +49,6 @@ export default function MonthView({ currentDate = new Date(), events = [], onDat
     return arr
   }, [startingDayOfWeek, daysInMonth])
 
-  // helper to find events for a date (compare numerically to avoid locale issues)
   const getEventsForDate = (day) => {
     if (!day) return []
     return events.filter((event) => {
@@ -102,7 +98,6 @@ export default function MonthView({ currentDate = new Date(), events = [], onDat
         {days.map((day, index) => {
           const dayEvents = getEventsForDate(day)
 
-          // aria label for the cell
           const ariaLabel = day
             ? `${new Date(year, month, day).toDateString()} — ${dayEvents.length} event${dayEvents.length !== 1 ? "s" : ""}`
             : ""

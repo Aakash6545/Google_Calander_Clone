@@ -7,7 +7,6 @@ import "./Sidebar.css"
 export default function Sidebar({ selectedDate, onDateSelect, refreshKey, onCloseSidebar }) {
   const [upcomingEvents, setUpcomingEvents] = useState([])
 
-  // Fetch upcoming events (abortable)
   useEffect(() => {
     const ac = new AbortController()
 
@@ -48,12 +47,9 @@ export default function Sidebar({ selectedDate, onDateSelect, refreshKey, onClos
     return () => ac.abort()
   }, [selectedDate, refreshKey])
 
-  // Re-fetch when tab becomes visible again
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
-        // simple re-fetch by toggling a fresh fetch (same logic here)
-        // keep this local and small (no race concerns because fetch has AbortController in the other effect)
         const ac = new AbortController()
         ;(async () => {
           try {

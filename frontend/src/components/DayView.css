@@ -28,7 +28,7 @@
   gap: 0;
   background: linear-gradient(180deg, #fff, #fbfdff);
   flex: 1 1 auto;
-  min-height: 0; /* allow proper inner scrolling */
+  min-height: 0; 
   overflow: auto;
 }
 
@@ -42,10 +42,9 @@
   overflow: hidden;
 }
 
-/* main day column */
 .day-column {
   position: relative;
-  overflow: visible; /* show events without clipping */
+  overflow: visible; 
 }
 
 /* hourly rows */

@@ -4,27 +4,15 @@ import { useState, useEffect, useMemo } from "react"
 import "./MiniCalendar.css"
 
 export default function MiniCalendar({ selectedDate, onDateSelect }) {
-  // normalize current month to first day
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = new Date()
     return new Date(d.getFullYear(), d.getMonth(), 1)
   })
 
-  // when parent changes selectedDate, show that month in the mini-calendar
-  useEffect(() => {
-    if (!selectedDate) return
-    const d = selectedDate instanceof Date ? selectedDate : new Date(selectedDate)
-    if (!Number.isNaN(d.getTime())) {
-      setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1))
-    }
-  }, [selectedDate])
-
-  // Normalize selectedDate prop to a Date object (or null)
   const normSelected = useMemo(() => {
     if (!selectedDate) return null
     const d = selectedDate instanceof Date ? selectedDate : new Date(selectedDate)
     if (Number.isNaN(d.getTime())) return null
-    // normalize to local midnight for safe comparisons
     return new Date(d.getFullYear(), d.getMonth(), d.getDate())
   }, [selectedDate])
 
@@ -34,7 +22,7 @@ export default function MiniCalendar({ selectedDate, onDateSelect }) {
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
   const daysInMonth = lastDay.getDate()
-  const startingDayOfWeek = firstDay.getDay() // 0..6 (Sun..Sat)
+  const startingDayOfWeek = firstDay.getDay() 
 
   const handlePrevMonth = () => {
     setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
@@ -44,12 +32,11 @@ export default function MiniCalendar({ selectedDate, onDateSelect }) {
     setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
   }
 
-  // Build full grid (leading and trailing nulls) so UI is consistent
   const days = useMemo(() => {
     const arr = []
     for (let i = 0; i < startingDayOfWeek; i++) arr.push(null)
     for (let i = 1; i <= daysInMonth; i++) arr.push(i)
-    while (arr.length % 7 !== 0) arr.push(null) // trailing blanks
+    while (arr.length % 7 !== 0) arr.push(null) 
     return arr
   }, [startingDayOfWeek, daysInMonth])
 

@@ -1,4 +1,3 @@
-/* Sidebar.css - styles for the calendar sidebar */
 
 .sidebar {
   width: 280px;
@@ -7,7 +6,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* allow proper scrolling inside flex layout */
+  min-height: 0; 
 }
 
 .sidebar-content {
@@ -17,9 +16,8 @@
   gap: 20px;
 }
 
-/* mobile header containing a close button (only visible when Sidebar is rendered on mobile) */
 .sidebar-mobile-header {
-  display: none; /* Hidden by default on desktop */
+  display: none; 
   justify-content: flex-end;
   align-items: center;
   margin-bottom: 8px;
@@ -40,7 +38,6 @@
   color: #111827;
 }
 
-/* show close button on small screens */
 @media (max-width: 900px) {
   .sidebar-mobile-header {
     display: flex;
@@ -52,21 +49,18 @@
   }
 }
 
-/* allow events list to scroll properly inside sidebar */
 .sidebar {
   display: flex;
   flex-direction: column;
-  min-height: 0; /* allow proper scrolling inside flex layout */
+  min-height: 0; 
   overflow: auto;
 }
 
-/* prevent upcoming-event contents from being clipped */
 .upcoming-event { 
   min-width: 0;
   word-break: break-word;
 }
 
-/* Upcoming events section */
 .upcoming-section {
   display: flex;
   flex-direction: column;
@@ -85,7 +79,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-right: 6px; /* guard for scrollbar */
+  padding-right: 6px;
 }
 
 .no-events {
@@ -95,7 +89,6 @@
   margin: 0;
 }
 
-/* each event row */
 .upcoming-event {
   display: flex;
   gap: 12px;

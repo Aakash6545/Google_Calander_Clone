@@ -20,7 +20,6 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
 
   // start with sidebar closed; only open when user presses hamburger
   const [showSidebar, setShowSidebar] = useState(false)
-  // track whether viewport is mobile so overlay/scroll-lock logic works
   const [isMobile, setIsMobile] = useState(() =>
     typeof window === "undefined" ? true : window.innerWidth < SIDEBAR_BREAKPOINT
   )
@@ -32,7 +31,6 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
     return () => window.removeEventListener("resize", onResize)
   }, [])
 
-  // prevent body scroll when mobile sidebar open
   useEffect(() => {
     if (typeof document === "undefined") return
     if (showSidebar && isMobile) {
