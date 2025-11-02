@@ -10,6 +10,15 @@ export default function MiniCalendar({ selectedDate, onDateSelect }) {
     return new Date(d.getFullYear(), d.getMonth(), 1)
   })
 
+  // when parent changes selectedDate, show that month in the mini-calendar
+  useEffect(() => {
+    if (!selectedDate) return
+    const d = selectedDate instanceof Date ? selectedDate : new Date(selectedDate)
+    if (!Number.isNaN(d.getTime())) {
+      setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1))
+    }
+  }, [selectedDate])
+
   // Normalize selectedDate prop to a Date object (or null)
   const normSelected = useMemo(() => {
     if (!selectedDate) return null

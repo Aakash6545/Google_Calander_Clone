@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import MonthView from "./MonthView"
 import WeekView from "./WeekView"
 import DayView from "./DayView"
@@ -8,21 +8,57 @@ import EventModal from "./EventModal"
 import Sidebar from "./Sidebar"
 import "./Calendar.css"
 
-export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDeleteEvent, onFetchEvents }) {
-  const [currentDate, setCurrentDate] = useState(new Date())
+export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, onDeleteEvent, onFetchEvents }) {
+  const [currentDate, setCurrentDate] = useState(() => new Date())
   const [view, setView] = useState("month") // 'month', 'week', 'day'
   const [showModal, setShowModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(() => new Date())
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0)
 
-  // new: mobile sidebar toggle
+  // new: mobile sidebar toggle, initial visibility depends on viewport
   const [showSidebar, setShowSidebar] = useState(false)
 
+  // keep a small breakpoint constant
+  const SIDEBAR_BREAKPOINT = 900
+
+  // keep a ref to the latest onFetchEvents to avoid effect re-run when parent passes unstable function
+  const onFetchEventsRef = useRef(onFetchEvents)
   useEffect(() => {
-    const start = getStartDate()
-    const end = getEndDate()
-    onFetchEvents(start, end)
+    onFetchEventsRef.current = onFetchEvents
+  }, [onFetchEvents])
+
+  useEffect(() => {
+    // on initial mount set sidebar visibility for desktop
+    if (typeof window !== "undefined") {
+      setShowSidebar(window.innerWidth >= SIDEBAR_BREAKPOINT)
+    }
+    const onResize = () => {
+      if (window.innerWidth >= SIDEBAR_BREAKPOINT) setShowSidebar(true)
+      // intentionally do not auto-close when shrinking to mobile to avoid jarring UX
+    }
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
+  // fetch visible range whenever date/view change — uses ref so identity changes of onFetchEvents don't retrigger effect
+  useEffect(() => {
+    try {
+      const start = getStartDate()
+      const end = getEndDate()
+      if (typeof onFetchEventsRef.current === "function") {
+        // call but don't rely on synchronous result
+        try {
+          onFetchEventsRef.current(start, end)
+        } catch (err) {
+          // if parent function throws synchronously, log but avoid breaking render loop
+          console.error("onFetchEvents threw:", err)
+        }
+      }
+    } catch (err) {
+      console.error("Error computing fetch range:", err)
+    }
+    // intentionally only depend on currentDate and view
   }, [currentDate, view])
 
   const getStartDate = () => {
@@ -31,6 +67,7 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
       date.setDate(1)
       date.setHours(0, 0, 0, 0)
     } else if (view === "week") {
+      // start of week: assume Sunday; change logic to (day + 6) % 7 for Monday-start if needed
       const day = date.getDay()
       date.setDate(date.getDate() - day)
       date.setHours(0, 0, 0, 0)
@@ -43,6 +80,7 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
   const getEndDate = () => {
     const date = new Date(currentDate)
     if (view === "month") {
+      // go to next month then move to last day of previous (current) month
       date.setMonth(date.getMonth() + 1)
       date.setDate(0)
       date.setHours(23, 59, 59, 999)
@@ -56,39 +94,64 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
   }
 
   const handlePrevious = () => {
-    const date = new Date(currentDate)
-    if (view === "month") date.setMonth(date.getMonth() - 1)
-    else if (view === "week") date.setDate(date.getDate() - 7)
-    else date.setDate(date.getDate() - 1)
-    setCurrentDate(date)
+    setCurrentDate((prev) => {
+      const date = new Date(prev)
+      if (view === "month") date.setMonth(date.getMonth() - 1)
+      else if (view === "week") date.setDate(date.getDate() - 7)
+      else date.setDate(date.getDate() - 1)
+      return date
+    })
   }
 
   const handleNext = () => {
-    const date = new Date(currentDate)
-    if (view === "month") date.setMonth(date.getMonth() + 1)
-    else if (view === "week") date.setDate(date.getDate() + 7)
-    else date.setDate(date.getDate() + 1)
-    setCurrentDate(date)
+    setCurrentDate((prev) => {
+      const date = new Date(prev)
+      if (view === "month") date.setMonth(date.getMonth() + 1)
+      else if (view === "week") date.setDate(date.getDate() + 7)
+      else date.setDate(date.getDate() + 1)
+      return date
+    })
   }
 
   const handleToday = () => {
     setCurrentDate(new Date())
   }
 
+  // safe wrappers: only call parent's callbacks if provided
   const handleCreateEvent = (eventData) => {
-    Promise.resolve(onCreateEvent(eventData)).finally(() => {
+    if (typeof onCreateEvent !== "function") {
       setShowModal(false)
-      setSidebarRefreshKey((k) => k + 1)
-    })
+      return
+    }
+    Promise.resolve()
+      .then(() => onCreateEvent(eventData))
+      .then(() => {
+        const start = getStartDate()
+        const end = getEndDate()
+        if (typeof onFetchEventsRef.current === "function") onFetchEventsRef.current(start, end)
+        setSidebarRefreshKey((k) => k + 1)
+      })
+      .catch((err) => console.error("create event error:", err))
+      .finally(() => {
+        setShowModal(false)
+      })
   }
 
   const handleUpdateEvent = (eventData) => {
-    if (selectedEvent) {
-      Promise.resolve(onUpdateEvent(selectedEvent._id, eventData)).finally(() => {
-        setShowModal(false)
+    if (!selectedEvent || typeof onUpdateEvent !== "function") {
+      setShowModal(false)
+      return
+    }
+    Promise.resolve()
+      .then(() => onUpdateEvent(selectedEvent._id, eventData))
+      .then(() => {
+        const start = getStartDate()
+        const end = getEndDate()
+        if (typeof onFetchEventsRef.current === "function") onFetchEventsRef.current(start, end)
         setSidebarRefreshKey((k) => k + 1)
       })
-    } else setShowModal(false)
+      .catch((err) => console.error("update event error:", err))
+      .finally(() => setShowModal(false))
   }
 
   const handleDateSelect = (date) => {
@@ -105,12 +168,20 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
   }
 
   const handleDeleteEvent = () => {
-    if (selectedEvent) {
-      Promise.resolve(onDeleteEvent(selectedEvent._id)).finally(() => {
-        setShowModal(false)
+    if (!selectedEvent || typeof onDeleteEvent !== "function") {
+      setShowModal(false)
+      return
+    }
+    Promise.resolve()
+      .then(() => onDeleteEvent(selectedEvent._id))
+      .then(() => {
+        const start = getStartDate()
+        const end = getEndDate()
+        if (typeof onFetchEventsRef.current === "function") onFetchEventsRef.current(start, end)
         setSidebarRefreshKey((k) => k + 1)
       })
-    }
+      .catch((err) => console.error("delete event error:", err))
+      .finally(() => setShowModal(false))
   }
 
   const handleDateFromSidebar = (date) => {
@@ -123,7 +194,12 @@ export default function Calendar({ events, onCreateEvent, onUpdateEvent, onDelet
     <div className="calendar-container">
       {/* Sidebar + overlay */}
       <div className={`sidebar-wrapper ${showSidebar ? "open" : "collapsed"}`}>
-        <Sidebar selectedDate={selectedDate} onDateSelect={handleDateFromSidebar} refreshKey={sidebarRefreshKey} />
+        <Sidebar
+          selectedDate={selectedDate}
+          onDateSelect={handleDateFromSidebar}
+          refreshKey={sidebarRefreshKey}
+          onCloseSidebar={() => setShowSidebar(false)}
+        />
       </div>
 
       <div className={`sidebar-overlay ${showSidebar ? "visible" : ""}`} onClick={() => setShowSidebar(false)} />
