@@ -82,7 +82,8 @@
 .day-column {
   position: relative;
   border-right: 1px solid #e6e9ee;
-  overflow: hidden;
+  /* allow events to overflow / be visible (avoid clipping) */
+  overflow: visible;
   background: #fff;
   outline: none;
 }
@@ -106,18 +107,20 @@
   box-sizing: border-box;
 }
 
-/* container for absolutely-positioned events */
+/* container for absolutely-positioned events - allow visible overflow */
 .events-container {
-  position: relative;
+  position: absolute;
   height: 100%;
   width: 100%;
-  z-index: 2;
+  z-index: 3;
   pointer-events: auto;
+  overflow: visible;
 }
 
 /* event block */
 .week-event {
   position: absolute;
+  box-sizing: border-box;
   padding: 6px 8px;
   border-radius: 8px;
   box-shadow: 0 6px 18px rgba(2,6,23,0.06);
@@ -129,6 +132,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
+  max-height: calc(100% - 4px);
 }
 
 .week-event:focus {
@@ -169,4 +173,6 @@
   .day-name { font-size: 12px; }
   .day-number { font-size: 12px; }
   .time-slot { min-height: 28px; }
+  .day-hour-row { min-height: 28px; }
+  .week-event { font-size: 12px; padding: 4px 6px; }
 }

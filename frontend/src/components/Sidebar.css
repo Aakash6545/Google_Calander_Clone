@@ -19,9 +19,10 @@
 
 /* mobile header containing a close button (only visible when Sidebar is rendered on mobile) */
 .sidebar-mobile-header {
-  display: flex;
+  display: none; /* Hidden by default on desktop */
   justify-content: flex-end;
   align-items: center;
+  margin-bottom: 8px;
 }
 
 .sidebar-close-btn {
@@ -37,6 +38,32 @@
 .sidebar-close-btn:hover {
   background: rgba(17, 24, 39, 0.04);
   color: #111827;
+}
+
+/* show close button on small screens */
+@media (max-width: 900px) {
+  .sidebar-mobile-header {
+    display: flex;
+  }
+
+  .sidebar {
+    width: 92vw;
+    max-width: 320px;
+  }
+}
+
+/* allow events list to scroll properly inside sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* allow proper scrolling inside flex layout */
+  overflow: auto;
+}
+
+/* prevent upcoming-event contents from being clipped */
+.upcoming-event { 
+  min-width: 0;
+  word-break: break-word;
 }
 
 /* Upcoming events section */
@@ -130,7 +157,6 @@
   text-overflow: ellipsis;
 }
 
-/* small screens - allow sidebar to become overlayed via wrapper logic (wrapper CSS handled in Calendar.css) */
 @media (max-width: 900px) {
   .sidebar {
     width: 100%;

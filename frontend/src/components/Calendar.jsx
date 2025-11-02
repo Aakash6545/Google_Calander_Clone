@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import MonthView from "./MonthView"
 import WeekView from "./WeekView"
 import DayView from "./DayView"
@@ -10,55 +10,55 @@ import "./Calendar.css"
 
 export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, onDeleteEvent, onFetchEvents }) {
   const [currentDate, setCurrentDate] = useState(() => new Date())
-  const [view, setView] = useState("month") // 'month', 'week', 'day'
+  const [view, setView] = useState("month")
   const [showModal, setShowModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [selectedDate, setSelectedDate] = useState(() => new Date())
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0)
 
-  // new: mobile sidebar toggle, initial visibility depends on viewport
-  const [showSidebar, setShowSidebar] = useState(false)
-
-  // keep a small breakpoint constant
   const SIDEBAR_BREAKPOINT = 900
 
-  // keep a ref to the latest onFetchEvents to avoid effect re-run when parent passes unstable function
-  const onFetchEventsRef = useRef(onFetchEvents)
-  useEffect(() => {
-    onFetchEventsRef.current = onFetchEvents
-  }, [onFetchEvents])
+  // start with sidebar closed; only open when user presses hamburger
+  const [showSidebar, setShowSidebar] = useState(false)
+  // track whether viewport is mobile so overlay/scroll-lock logic works
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth < SIDEBAR_BREAKPOINT
+  )
 
   useEffect(() => {
-    // on initial mount set sidebar visibility for desktop
-    if (typeof window !== "undefined") {
-      setShowSidebar(window.innerWidth >= SIDEBAR_BREAKPOINT)
-    }
-    const onResize = () => {
-      if (window.innerWidth >= SIDEBAR_BREAKPOINT) setShowSidebar(true)
-      // intentionally do not auto-close when shrinking to mobile to avoid jarring UX
-    }
+    if (typeof window === "undefined") return
+    const onResize = () => setIsMobile(window.innerWidth < SIDEBAR_BREAKPOINT)
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
   }, [])
 
-  // fetch visible range whenever date/view change — uses ref so identity changes of onFetchEvents don't retrigger effect
+  // prevent body scroll when mobile sidebar open
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    if (showSidebar && isMobile) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      return () => {
+        document.body.style.overflow = prev || ""
+      }
+    }
+  }, [showSidebar, isMobile])
+
+  // fetch visible range whenever date/view change (uses ref)
   useEffect(() => {
     try {
       const start = getStartDate()
       const end = getEndDate()
       if (typeof onFetchEventsRef.current === "function") {
-        // call but don't rely on synchronous result
         try {
           onFetchEventsRef.current(start, end)
         } catch (err) {
-          // if parent function throws synchronously, log but avoid breaking render loop
           console.error("onFetchEvents threw:", err)
         }
       }
     } catch (err) {
       console.error("Error computing fetch range:", err)
     }
-    // intentionally only depend on currentDate and view
   }, [currentDate, view])
 
   const getStartDate = () => {
@@ -67,7 +67,6 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
       date.setDate(1)
       date.setHours(0, 0, 0, 0)
     } else if (view === "week") {
-      // start of week: assume Sunday; change logic to (day + 6) % 7 for Monday-start if needed
       const day = date.getDay()
       date.setDate(date.getDate() - day)
       date.setHours(0, 0, 0, 0)
@@ -80,7 +79,6 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
   const getEndDate = () => {
     const date = new Date(currentDate)
     if (view === "month") {
-      // go to next month then move to last day of previous (current) month
       date.setMonth(date.getMonth() + 1)
       date.setDate(0)
       date.setHours(23, 59, 59, 999)
@@ -117,7 +115,7 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
     setCurrentDate(new Date())
   }
 
-  // safe wrappers: only call parent's callbacks if provided
+  // wrappers that call parent's handlers if provided
   const handleCreateEvent = (eventData) => {
     if (typeof onCreateEvent !== "function") {
       setShowModal(false)
@@ -132,9 +130,7 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
         setSidebarRefreshKey((k) => k + 1)
       })
       .catch((err) => console.error("create event error:", err))
-      .finally(() => {
-        setShowModal(false)
-      })
+      .finally(() => setShowModal(false))
   }
 
   const handleUpdateEvent = (eventData) => {
@@ -158,7 +154,6 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
     setSelectedDate(date)
     setSelectedEvent(null)
     setShowModal(true)
-    // close mobile sidebar when selecting a date
     setShowSidebar(false)
   }
 
@@ -193,7 +188,7 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
   return (
     <div className="calendar-container">
       {/* Sidebar + overlay */}
-      <div className={`sidebar-wrapper ${showSidebar ? "open" : "collapsed"}`}>
+      <div className={`sidebar-wrapper ${showSidebar ? "open" : "collapsed"}`} aria-hidden={!showSidebar}>
         <Sidebar
           selectedDate={selectedDate}
           onDateSelect={handleDateFromSidebar}
@@ -202,7 +197,7 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
         />
       </div>
 
-      <div className={`sidebar-overlay ${showSidebar ? "visible" : ""}`} onClick={() => setShowSidebar(false)} />
+      <div className={`sidebar-overlay ${showSidebar && isMobile ? "visible" : ""}`} onClick={() => setShowSidebar(false)} />
 
       <div className="calendar-main">
         <div className="calendar-header">
@@ -210,9 +205,9 @@ export default function Calendar({ events = [], onCreateEvent, onUpdateEvent, on
             {/* mobile hamburger to open sidebar */}
             <button
               className="mobile-menu-btn"
-              aria-label="Open sidebar"
+              aria-label={showSidebar ? "Close sidebar" : "Open sidebar"}
               onClick={() => setShowSidebar((s) => !s)}
-              title="Open sidebar"
+              title={showSidebar ? "Close sidebar" : "Open sidebar"}
             >
               {/* simple hamburger */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>

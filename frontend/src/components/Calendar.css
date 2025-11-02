@@ -26,47 +26,47 @@
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
   max-width: var(--sidebar-w);
-  transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 260ms;
-  box-shadow: none;
-  z-index: 40;
   background: #fff;
   border-right: 1px solid var(--border);
-}
-
-/* collapsed state on small screens */
-.sidebar-wrapper.collapsed {
-  transform: translateX(-100%);
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 260ms;
+  position: relative; /* desktop: occupies layout space */
+  height: 100vh;
+  z-index: 40;
   box-shadow: none;
 }
 
-/* open overlay slide-in mobile state */
+/* collapsed state - on desktop collapsed means hidden (shouldn't happen) */
+.sidebar-wrapper.collapsed {
+  transform: translateX(-100%);
+}
+
+/* open state */
 .sidebar-wrapper.open {
   transform: translateX(0);
-  box-shadow: var(--shadow);
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
 }
 
 /* overlay behind sidebar (only displayed on mobile open) */
 .sidebar-overlay {
-  display: none;
-}
-.sidebar-overlay.visible {
-  display: block;
   position: fixed;
   inset: 0;
-  background: rgba(17,24,39,0.35);
+  background: rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
   z-index: 30;
+}
+.sidebar-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Main area */
 .calendar-main {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -101,6 +101,31 @@
 }
 .mobile-menu-btn:hover { background: rgba(17,24,39,0.03); color: #111827; }
 
+/* Mobile menu (hamburger) - show always so user can open sidebar explicitly */
+.mobile-menu-btn {
+  display: inline-flex; /* always visible per request */
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--accent);
+  transition: background 120ms ease, transform 120ms ease;
+}
+.mobile-menu-btn:hover {
+  background: rgba(17,24,39,0.03);
+  transform: translateY(-1px);
+}
+
+/* Show hamburger on mobile */
+@media (max-width: 900px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+}
 /* Nav arrows container */
 .nav-arrows {
   display: flex;
@@ -170,32 +195,56 @@
   padding: 18px;
 }
 
-/* small devices: collapse sidebar and stack header */
+/* Update the sidebar-wrapper styles */
+.sidebar-wrapper {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  max-width: var(--sidebar-w);
+  background: #fff;
+  border-right: 1px solid var(--border);
+  position: relative; /* Change from fixed to relative for large screens */
+  height: 100vh;
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1);
+}
+
+/* Remove transform by default (visible on desktop) */
+.sidebar-wrapper.collapsed {
+  transform: none;
+}
+
+/* Mobile styles */
 @media (max-width: 900px) {
   .sidebar-wrapper {
     position: fixed;
     left: 0;
     top: 0;
-    height: 100vh;
+    z-index: 40;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow);
+  }
+
+  .sidebar-wrapper.collapsed {
     transform: translateX(-100%);
   }
-  .sidebar-wrapper.collapsed { transform: translateX(-100%); }
-  .mobile-menu-btn { display: inline-flex; }
-  .sidebar-overlay { display: none; }
-  .sidebar-overlay.visible { display: block; }
-  .calendar-content { padding: 12px; }
-  .header-title { font-size: 16px; min-width: 120px; }
+
+  .sidebar-wrapper.open {
+    transform: translateX(0);
+  }
+
+  /* ensure calendar content stretches full width when sidebar hidden */
+  .calendar-main {
+    width: 100%;
+  }
+
+  /* show hamburger only on mobile */
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
 }
 
-/* very small devices: stack header rows for better tap targets */
-@media (max-width: 480px) {
-  .calendar-header {
-    padding: 12px;
-    gap: 10px;
+/* Desktop: ensure hamburger hidden */
+@media (min-width: 901px) {
+  .mobile-menu-btn {
+    display: none;
   }
-  .header-controls { gap: 8px; }
-  .view-controls { gap: 6px; }
-  .btn { padding: 8px 10px; font-size: 13px; }
-  .btn-nav { padding: 6px 8px; font-size: 16px; }
-  .calendar-content { padding: 10px; }
 }
