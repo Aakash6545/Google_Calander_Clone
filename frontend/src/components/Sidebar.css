@@ -1,0 +1,85 @@
+.sidebar {
+  width: 280px;
+  background-color: #fff;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upcoming-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upcoming-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  padding: 0 8px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.no-events {
+  font-size: 13px;
+  color: #9ca3af;
+  padding: 8px;
+  margin: 0;
+}
+
+.upcoming-event {
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+  border-left: 3px solid;
+  border-radius: 4px;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upcoming-event:hover {
+  background-color: #f3f4f6;
+  transform: translateX(2px);
+}
+
+.event-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 40px;
+}
+
+.event-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}

@@ -1,0 +1,87 @@
+.mini-calendar {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.mini-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mini-calendar-header button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.mini-calendar-header button:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.month-year {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.mini-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.mini-weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.mini-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.mini-day {
+  aspect-ratio: 1;
+  border: none;
+  background-color: transparent;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #1f2937;
+}
+
+.mini-day:hover:not(.empty) {
+  background-color: #f3f4f6;
+}
+
+.mini-day.empty {
+  cursor: default;
+}
+
+.mini-day.today {
+  background-color: #fbbf24;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mini-day.selected {
+  background-color: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
